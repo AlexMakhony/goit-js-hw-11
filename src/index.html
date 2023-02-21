@@ -4,11 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page title</title>
-    <link rel="stylesheet" href="./sass/index.scss" />
-    <script type="module" src="./index.js"></script>
+    <link rel="stylesheet" href="./css/style.css" />
+    
   </head>
   <body>
-    <!-- ❗️❗️❗️ Add partials like so for every page -->
-    <include src="./partials/example.html"></include>
+    <header>
+      <form class="search-form" id="search-form">
+        <input
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button class="submit" type="submit"></button>
+      </form>
+    </header>
+    <section>
+      <div class="gallery">
+        <!-- Картки зображень -->
+      </div>
+    </section>
+    <button type="button" class="more visually-hidden">Load more</button>
+  <script type="module" src="./index.js"></script>
   </body>
 </html>
