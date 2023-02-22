@@ -3,19 +3,31 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import { galleryMarkup } from './markup';
-// import { fetchPictures } from './js/fetchPictures';
+import OnlyScroll from 'only-scrollbar';
 const axios = require('axios').default;
 
+// Ищем наши элементы
 const gallery = document.querySelector('.gallery');
 const form = document.querySelector('.search-form');
-const loadMore = document.querySelector('.more');
+const loadMoreBtn = document.querySelector('.more');
 const input = document.querySelector('input');
 
+// Ключ
 const MY_API_KEY = '33691887-ce6385750ae3035ec2d85fa9a';
+// Линк
+const LINK = 'https://pixabay.com/api/?';
+
 let pageforBtn = 1;
 let valueInput = '';
 let totalHitsValue = '';
 
+// Only-scroll bar
+const scroll = new OnlyScroll(document.scrollingElement, {
+  damping: 0.8,
+  eventContainer: window,
+});
+
+// light box
 const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionDelay: 250,
@@ -23,17 +35,18 @@ const lightbox = new SimpleLightbox('.gallery a', {
 });
 
 
-
+// Слушаем кнопки
 form.addEventListener('submit', onSubmit);
+loadMoreBtn.addEventListener('click', onClick);
 
-loadMore.addEventListener('click', onClick);
-
+// Функция для формы при сабмите
 function onSubmit(e) {
   e.preventDefault();
   gallery.innerHTML = '';
+  // Забираем инфо из поисковика
   valueInput = e.currentTarget.elements.searchQuery.value.trim();
-  if (!loadMore.classList.contains('visually-hidden')) {
-    loadMore.classList.add('visually-hidden');
+  if (!loadMoreBtn.classList.contains('visually-hidden')) {
+    loadMoreBtn.classList.add('visually-hidden');
   }
   if (valueInput === '') {
     Notify.failure('Enter a query');
@@ -51,10 +64,11 @@ function onSubmit(e) {
   }
 }
 
+// Стучимся в АПИшку
 async function getPicture(name) {
   try {
     const response = await axios.get(
-      `https://pixabay.com/api/?key=${MY_API_KEY}&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${pageforBtn}`
+      `${LINK}key=${MY_API_KEY}&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${pageforBtn}`
     );
     if (response.data.hits.length === 0) {
       Notify.failure(
@@ -65,14 +79,15 @@ async function getPicture(name) {
     let lastPage = Math.ceil(response.data.totalHits / 40);
     totalHitsValue = response.data.totalHits;
 
-    makeListCountries(arr);
+    makePictureList(arr);
 
+    // Даем условия нашей кнопке "Загрузить еще"
     if (response.data.total > 40) {
-      loadMore.classList.remove('visually-hidden');
+      loadMoreBtn.classList.remove('visually-hidden');
     }
     if (pageforBtn === lastPage) {
-      if (!loadMore.classList.contains('visually-hidden')) {
-        loadMore.classList.add('visually-hidden');
+      if (!loadMoreBtn.classList.contains('visually-hidden')) {
+        loadMoreBtn.classList.add('visually-hidden');
       }
       if (response.data.total <= 40) {
         return;
@@ -84,11 +99,13 @@ async function getPicture(name) {
   }
 }
 
-function makeListCountries(data) {
+// Добавляем разметочку из импорта
+function makePictureList(data) {
   const markup = galleryMarkup(data);
   gallery.insertAdjacentHTML('beforeend', markup);
 }
 
+// Функция нашей кнопке
 function onClick(e) {
   e.preventDefault();
   getPicture(valueInput).then(() => {
